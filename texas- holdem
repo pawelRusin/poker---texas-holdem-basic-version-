@@ -1,0 +1,805 @@
+package Poker;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+
+        Deck deckGlowna = new Deck();
+
+        Player player1 = new Player("John");
+        Player player2 = new Player("Edward");
+
+
+        Deal deal = new Deal(deckGlowna, player1, player2);
+
+    }
+}
+
+
+enum COLOR {DIAMONDS, HEARTS,CLUBS, SPADES}
+
+public class Card implements Comparable<Card> {
+
+
+    private int rank;
+    private COLOR COLOR;
+
+    public Card(int rank, COLOR COLOR) {
+
+        this.rank = rank;
+        this.COLOR = COLOR;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public COLOR getCOLOR() {
+        return COLOR;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int compareTo(Card k) {
+
+       return this.toString().compareTo(k.toString());
+    }
+
+    @Override
+    public String toString() {
+        return  rank +" "
+                 + COLOR
+                ;
+    }
+
+}
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+public class Player {
+
+    Result result;
+    String name;
+
+
+    Set<Card> finalSet;
+
+    public Set<Card> getFinalSet() {
+        return finalSet;
+    }
+
+    public void setFinalSet(Set<Card> finalSet) {
+        this.finalSet = finalSet;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    boolean color;
+    boolean strit;
+    int highest;
+
+    List<Card> playersCards;
+    List<Card>  playerFinalCards;
+
+    public Player(String name) {
+        this.name = name;
+
+
+    }
+
+    public void setHighest()
+    {
+        Card one = playersCards.get(0);
+        Card two = playersCards.get(1);
+
+        if (one.getRank() > two.getRank())
+            highest = one.getRank();
+
+        if (one.getRank() < two.getRank())
+            highest = two.getRank();
+        if (one.getRank() == two.getRank())
+            highest = one.getRank();
+    }
+
+
+
+    public Card setCardHighest()
+    {
+        Card one = playersCards.get(0);
+        Card two = playersCards.get(1);
+
+        if (one.getRank() > two.getRank())
+        return one;
+       if (one.getRank() < two.getRank()) {
+
+            return two;
+        }else
+       {
+           return one;
+       }
+    }
+
+
+    public List<Card> getPlayersCards() {
+
+        for (Card k : playersCards)
+        {
+            System.out.println("player " + name + " has " + k );
+        }
+        return playersCards;
+    }
+
+    public void setCards(List<Card> lista)
+    {
+        this.playersCards = new ArrayList<>(lista);
+
+    }
+
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public int getHighest() {
+        return highest;
+    }
+
+    class Result
+    {
+        boolean color;
+        boolean strit;
+        int resultPairs;
+        int highestCard;
+
+
+        public boolean isColor() {
+            return color;
+        }
+
+        public boolean isStrit() {
+            return strit;
+        }
+
+        public int getResultPairs() {
+            return resultPairs;
+        }
+
+        public int getHighestCard() {
+            return highestCard;
+        }
+
+        @Override
+        public String toString() {
+            return "Result{" +
+                    "color=" + color +
+                    ", strit=" + strit +
+                    ", resultPairs=" + resultPairs +
+                    ", highestCard=" + highestCard +
+                    '}';
+        }
+
+        Set<Card> finalResultSet;
+
+        public Result(boolean color, boolean strit, int resultPairs, int highestCard ) {
+            this.color = color;
+            this.strit = strit;
+            this.resultPairs = resultPairs;
+            this.highestCard = highestCard;
+
+            result = this;
+        }
+    }
+}
+
+
+
+import java.util.*;
+
+
+
+public class Deck {
+
+    private Set<COLOR> setOfColors = EnumSet.allOf(COLOR.class);
+    private List<Card> deck = new ArrayList<Card>();
+    private COLOR[] colors = COLOR.values();
+
+
+    public List<Card> getDeck() {
+        return deck;
+    }
+
+    public Deck()
+    {
+        setOfColors = new HashSet<>();
+
+        for (int i = 0; i < colors.length; i++)
+        {
+            for (int j =1;j<14; j++ )
+            {
+                deck.add(new Card(j, colors[i]));
+
+            }
+        }
+    }
+}
+
+
+import java.util.*;
+
+public class Deal {
+
+    private Comparator<Card> comparator;
+    private Deck deckGlowna;
+    private Deck deckStolowa = new Deck();
+    private List<Card> cardStol = new ArrayList<>();
+    private Player player1;
+    private Player player2;
+    private List<Card> tableCards;
+    private Player.Result pR1;
+    private Player.Result pR2;
+    private static int count = 1;
+
+
+    public Deal(Deck deckGlowna, Player player1, Player player2) {
+        this.deckGlowna = deckGlowna;
+        this.tableCards = new ArrayList<>(tableCards5());
+
+
+        comparator = new Comparator<Card>() {
+            @Override
+            public int compare(Card o1, Card o2) {
+
+
+                if (o1.getRank() > o2.getRank())
+                    return 1;
+                else if (o1.getRank() < o2.getRank())
+                    return 0 - 1;
+                else {
+                    return 0;
+                }
+            }
+        };
+
+        this.player1 = player1;
+        this.player2 = player2;
+
+
+        player1.setCards(player2Cards());
+        player2.setCards(player2Cards());
+
+
+//        playerOneFinal1cards =  setFinalCards(player1.getPlayersCards());
+//        playerTwoFinal1cards = setFinalCards(player1.getPlayersCards());
+//
+        player1.setFinalSet(setFinalCards(player1.getPlayersCards()));
+        player2.setFinalSet(setFinalCards(player2.getPlayersCards()));
+
+
+        pR1 = createResult(player1);
+        pR2 = createResult(player2);
+        player1.setResult(pR1);
+        player2.setResult(pR2);
+
+        compareResults(player1.getResult(), player2.getResult());
+
+    }
+
+
+    private List<Card> tableCards5() {
+        Random random = new Random();
+        for (int i = 0; i < 5; i++) {
+            int los = random.nextInt(51 - i);// indeks od 0 do 51 - 52 kart w talii
+            /*
+
+//            int los = random.nextInt(deckStolowa.getDeck().size());
+//             */
+            cardStol.add(deckStolowa.getDeck().get(los));
+            deckStolowa.getDeck().remove(los);
+
+        }
+
+
+        for (Card card : cardStol) {
+            System.out.println("table cards " + card);
+        }
+        return cardStol;
+
+    }
+
+    private List<Card> player2Cards() {
+
+        List<Card> kartyGracza = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < 2; i++) {
+            int losGracz = random.nextInt(deckStolowa.getDeck().size());
+            kartyGracza.add(deckStolowa.getDeck().get(losGracz));
+            deckStolowa.getDeck().remove(losGracz);
+        }
+
+        return kartyGracza;
+    }
+
+    private Set<Card> setFinalCards(List<Card> platCards) {
+
+
+        List<Card> all = new ArrayList<>(cardStol);
+        all.addAll(platCards);
+        Set<Card> finalCards = new HashSet<>();
+
+        boolean color = chechColor(all);
+        boolean strit = checkStrit(all);
+        int pars = checkPars(all);
+
+        if (color && strit) {
+            System.out.println("player " + count + " has poker");
+            finalCards = poker(all);
+
+        } else if (pars == 8) {
+            System.out.println("player " + count + " has four of kind ");
+            finalCards = finalPairs(all);
+        } else if (pars == 5) {
+            System.out.println("player " + count + " has full");
+            finalCards = finalPairs(all);
+        } else if (color) {
+            System.out.println("player " + count + " has color");
+            finalCards = finalColor(all);
+        } else if (strit) {
+            System.out.println("player " + count + " has straight");
+            finalCards = finalStrit(all);
+        }
+
+        else if (pars == 3) {
+            System.out.println("player " + count + " has three of kind");
+            finalCards = finalPairs(all);
+        } else if (pars == 4) {
+            System.out.println("player " + count + " has 2 pairs");
+            finalCards = finalPairs(all);
+        } else if (pars == 2) {
+            System.out.println("player " + count + " has  pair");
+            finalCards = finalPairs(all);
+        } else if (pars == 0) {
+            System.out.println("pair ");
+            finalCards = finalPairs(all);
+        }
+
+        count++;
+        return finalCards;
+    }
+
+    private Set<Card> poker(List<Card> list) {
+        Set<Card> pokerColor = new HashSet<>(finalColor(list));
+
+        List<Card> pokerColorL = new ArrayList<>(pokerColor);
+
+        Set<Card> pokerStrit = new HashSet<>(finalStrit(pokerColorL));
+
+        return null;
+    }
+
+    private Set<Card> finalStrit(List<Card> list) {
+
+        boolean[] tab = new boolean[13];
+        boolean tempB;
+        Card tt;
+        int pp;
+        int position = 0;
+
+        Set<Card> setStrit = new HashSet<>();
+
+
+        for (int i = 0; i < list.size(); i++) {
+            tt = list.get(i);
+            pp = tt.getRank() - 1;
+
+            tempB = true;
+            tab[pp] = tempB;
+        }
+
+        for (int j = 0; j < tab.length; j++) {
+        }
+
+
+        for (int k = 0; k < tab.length - 4; k++) {
+            if (tab[k] && tab[k + 1] && tab[k + 2] && tab[k + 3] && tab[k + 4]) {
+
+                position = k;
+            }
+        }
+
+
+        for (Card b : list) {
+            if (b.getRank() == position + 1) {
+                setStrit.add(b);
+                break;
+            }
+        }
+
+        Collections.sort(list);
+        Collections.reverse(list);
+
+
+        boolean spr = false;
+
+        for (int i = 0; i < list.size() - 1; i++) {
+            spr = checkIfIs(setStrit, list.get(i));
+
+
+            if (list.get(i).getRank() != list.get(i + 1).getRank() && spr)
+                setStrit.add(list.get(i));
+
+        }
+
+
+        return setStrit;
+    }
+
+    private boolean checkIfIs(Set<Card> set, Card card) {
+
+        Iterator it = set.iterator();
+        while (it.hasNext()) {
+            if (((Card) (it.next())).getRank() == card.getRank()) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+
+        return true;
+    }
+
+
+    private Set<Card> finalColor(List<Card> list) {
+        Set<Card> lista3k = new HashSet<>();
+
+
+        int countDiamonds = 0;
+        int countHerts = 0;
+        int countSpades = 0;
+        int countClubs = 0;
+
+        COLOR winColor = null;
+
+        for (Card k : list) {
+
+            switch (k.getCOLOR()) {
+                case HEARTS:
+                    countHerts++;
+                    break;
+                case DIAMONDS:
+                    countDiamonds++;
+                    break;
+                case SPADES:
+                    countSpades++;
+                    break;
+                case CLUBS:
+                    countClubs++;
+                    break;
+            }
+        }
+
+
+        if ((countHerts >= 5)) {
+
+            winColor = COLOR.HEARTS;
+
+        } else if (countDiamonds >= 5) {
+            winColor = COLOR.DIAMONDS;
+        } else if (countSpades >= 5) {
+            winColor = COLOR.SPADES;
+        } else if (countClubs >= 5) {
+            winColor = COLOR.CLUBS;
+        }
+
+        System.out.println(winColor);
+
+        for (Card k : list) {
+            if (k.getCOLOR() == winColor) {
+                lista3k.add(k);
+            }
+        }
+
+        return lista3k;
+    }
+
+    private Set<Card> finalPairs(List<Card> list) {
+        Set<Card> setOfPars = new HashSet<>();
+
+        int liczbaPar = 0;
+        Card card;
+        Card card2;
+
+        for (int i = 0; i < list.size(); i++) {
+            card = list.get(i);
+
+            for (int j = i + 1; j < list.size(); j++) {
+                card2 = list.get(j);
+
+                if (card.getRank() == card2.getRank()) {
+                    liczbaPar++;
+                    setOfPars.add(card);
+                    setOfPars.add(card2);
+                }
+            }
+        }
+
+
+        if (setOfPars.size() > 5) {
+            return threePars(setOfPars);
+        }
+
+        return setOfPars;
+    }
+
+    private Set<Card> threePars(Set<Card> cards) {
+        List<Card> sortList = new ArrayList<>(cards);
+        Collections.sort(sortList, comparator);
+
+        sortList.remove(0);
+        sortList.remove(1);
+
+        return new HashSet<>(sortList);
+    }
+
+    private int checkPars(List<Card> taliaZlicz) {
+        Set<Card> setOfPars = new HashSet<>();
+
+        int liczbaPar = 0;
+        Card card;
+        Card card2;
+
+        for (int i = 0; i < taliaZlicz.size(); i++) {
+            card = taliaZlicz.get(i);
+
+            for (int j = i + 1; j < taliaZlicz.size(); j++) {
+                card2 = taliaZlicz.get(j);
+
+                if (card.getRank() == card2.getRank()) {
+                    liczbaPar++;
+
+                    setOfPars.add(card);
+                    setOfPars.add(card2);
+                }
+            }
+        }
+
+        if (setOfPars.size() == 2) {
+            return 2;
+        } else if (setOfPars.size() == 3) {
+            return 3;
+        } else if (setOfPars.size() == 4) {
+
+            int fourOreight = twoPairOr4(setOfPars);
+            return fourOreight;
+        } else if (setOfPars.size() == 5) {
+            return 5;
+        }
+
+
+        return 0;
+    }
+
+    private int twoPairOr4(Set<Card> lista) {
+        List<Card> ll = new ArrayList<>(lista);
+
+        if (ll.get(0).getRank() == ll.get(1).getRank() && ll.get(0).getRank() == ll.get(2).getRank()) {
+            return 8;
+        } else {
+            return 4;
+        }
+    }
+
+    private boolean chechColor(List<Card> lista) {
+
+        int countDiamonds = 0;
+        int countHearts = 0;
+        int countSpades = 0;
+        int countClubs = 0;
+
+
+        for (Card k : lista) {
+
+            switch (k.getCOLOR()) {
+                case HEARTS:
+                    countHearts++;
+                    break;
+                case DIAMONDS:
+                    countDiamonds++;
+                    break;
+                case SPADES:
+                    countSpades++;
+                    break;
+                case CLUBS:
+                    countClubs++;
+                    break;
+            }
+        }
+
+        if ((countHearts >= 5) || (countDiamonds >= 5) || (countSpades >= 5) || (countClubs >= 5)) {
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkStrit(List<Card> lista) {
+
+        boolean[] tab = new boolean[13];
+        boolean tempB;
+        Card tt;
+        int pp;
+
+
+        for (int i = 0; i < lista.size(); i++) {
+            tt = lista.get(i);
+            pp = tt.getRank() - 1;
+
+            tempB = true;
+            tab[pp] = tempB;
+        }
+
+
+        for (int k = 0; k < tab.length - 4; k++) {
+            if (tab[k] && tab[k + 1] && tab[k + 2] && tab[k + 3] && tab[k + 4]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private int checkThehighestCard(List<Card> lista) {
+        int highestCardNumber = 0;
+
+        for (Card k : lista) {
+            if (k.getRank() > highestCardNumber) {
+                highestCardNumber = k.getRank();
+            }
+        }
+        return highestCardNumber;
+    }
+
+    private void compareResults(Player.Result player1R, Player.Result player2R) {
+
+        List<Card> player1List = new ArrayList<>(player1.getFinalSet());
+
+        Collections.sort(player1List, comparator);
+
+        Card highsCardP1;
+        Card highsCardP2;
+
+
+        Collections.reverse(player1List);
+
+        if (!player1List.isEmpty()) {
+            highsCardP1 = player1List.get(0);
+        } else {
+            highsCardP1 = player1.setCardHighest();
+        }
+
+        List<Card> player2List = new ArrayList<>(player2.getFinalSet());
+
+        Collections.sort(player2List);
+
+
+        if (!player2List.isEmpty()) {
+            highsCardP2 = player2List.get(0);
+        } else {
+            highsCardP2 = player2.setCardHighest();
+        }
+
+        int playerOnePoints = countPoint(player1R);
+        int playerOTwoPoints = countPoint(player2R);
+
+        if (playerOnePoints > playerOTwoPoints) {
+            System.out.println("player 1 won");
+        }
+        if (playerOnePoints < playerOTwoPoints) {
+            System.out.println("player 2 won");
+        }
+
+        if (playerOnePoints == playerOTwoPoints) {
+            compareRank(highsCardP1, highsCardP2);
+
+        }
+    }
+
+    private boolean compareRank(Card player1C, Card player2C) {
+        int karta1rang = player1C.getRank();
+        int karta2rang = player2C.getRank();
+
+        player1.setHighest();
+        player2.setHighest();
+        int rank = player1C.getRank();
+        int rank2 = player2C.getRank();
+
+
+        if (karta1rang == karta2rang) {
+            int playerHighest = player1.getHighest();
+            int player2Highest = player2.getHighest();
+
+            System.out.println("highest " + playerHighest + " " + player2Highest);
+            if (playerHighest > player2Highest) {
+                System.out.println("player one won");
+                return true;
+            }
+            if (playerHighest < player2Highest) {
+                System.out.println("player two won");
+                return true;
+            } else {
+                System.out.println("tied");
+            }
+
+        }
+        if (karta1rang > karta2rang) {
+            System.out.println("player one has won");
+            return true;
+        }
+        if (karta1rang < karta2rang) {
+            System.out.println("player 2 has won");
+            return false;
+
+        }
+        return true;
+    }
+
+    private int countPoint(Player.Result result) {
+
+
+        int points = 0;
+
+
+        if (result.isStrit() && result.isColor()) {
+            points = 10;
+        } else if (result.resultPairs == 8) {
+            points = 9;
+        } else if (result.resultPairs == 5) {
+            points = 8;
+        } else if (result.isColor()) {
+            points = 7;
+        } else if (result.isStrit()) {
+            points = 6;
+
+        } else if (result.resultPairs == 3) {
+            points = 5;
+        } else if (result.resultPairs == 4) {
+            points = 4;
+        } else if (result.resultPairs == 2) {
+
+            points = 3;
+        } else {
+            points = 0;
+        }
+
+        return points;
+    }
+
+
+    private Player.Result createResult(Player player) {
+        Set<Card> setTemp = new HashSet<>(player.getFinalSet());
+        List<Card> kartyGracza = new ArrayList<>(setTemp);
+
+        boolean color = chechColor(kartyGracza);
+        boolean strit = checkStrit(kartyGracza);
+        int highest = checkThehighestCard(kartyGracza);
+        int pars = checkPars(kartyGracza);
+
+        return player.new Result(color, strit, pars, highest);
+    }
+}
+
+
